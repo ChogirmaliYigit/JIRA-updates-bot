@@ -1,16 +1,19 @@
 from aiogram import Router, types
 from aiogram.filters import CommandStart
 from aiogram.enums.parse_mode import ParseMode
+from aiogram.fsm.context import FSMContext
 from aiogram.client.session.middlewares.request_logging import logger
 from loader import db, bot
 from data.config import ADMINS
 from utils.extra_datas import make_title
+from keyboards.inline.buttons import main_markup
+from states.states import UserState
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def do_start(message: types.Message):
+async def do_start(message: types.Message, state: FSMContext):
     """
             MARKDOWN V2                     |     HTML
     link:   [Google](https://google.com/)   |     <a href='https://google.com/'>Google</a>
@@ -46,4 +49,8 @@ async def do_start(message: types.Message):
             )
         except Exception as error:
             logger.info(f"Data did not send to admin: {admin}. Error: {error}")
-    await message.answer(f"Assalomu alaykum {make_title(full_name)}\!", parse_mode=ParseMode.MARKDOWN_V2)
+    await message.answer(f"Assalomu alaykum {make_title(full_name)}\!\n\n"
+                         f"JIRA platformasidagi o'zgarishlarni telegram guruhingizga qabul qiling\.",
+                         parse_mode=ParseMode.MARKDOWN_V2,
+                         reply_markup=main_markup)
+    await state.set_state(UserState.integrate_jira)
